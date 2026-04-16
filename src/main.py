@@ -8,9 +8,7 @@ import uvicorn
 
 sys.path.append(str(Path(__file__).parent.parent))
 
-from src.api.auth import router as router_auth
-from src.api.data import router as router_data
-from src.api.admin import router as router_admin
+from src.api.v1.router import api_v1_router
 from src.init import redis_connector
 
 
@@ -25,9 +23,7 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(lifespan=lifespan)
 
-app.include_router(router_auth)
-app.include_router(router_data)
-app.include_router(router_admin)
+app.include_router(api_v1_router)
 
 
 if __name__ == "__main__":

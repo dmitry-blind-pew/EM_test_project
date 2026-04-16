@@ -1,7 +1,7 @@
 from typing import TypeVar, Type, Generic
 from pydantic import BaseModel
 
-from src.database import BaseORM
+from src.core.db import BaseORM
 
 ModelType = TypeVar("ModelType", bound=BaseORM)
 SchemaType = TypeVar("SchemaType", bound=BaseModel)

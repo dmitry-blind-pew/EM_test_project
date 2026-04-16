@@ -3,7 +3,7 @@ from typing import List
 from sqlalchemy import String, Boolean
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from src.database import BaseORM
+from src.core.db import BaseORM
 
 
 if typing.TYPE_CHECKING:

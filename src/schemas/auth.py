@@ -1,6 +1,6 @@
-from pydantic import BaseModel, EmailStr, field_validator
+from pydantic import BaseModel, EmailStr, ValidationInfo, field_validator
 
-from src.exceptions import BadRequestException
+from src.core.exceptions import BadRequestException
 
 
 class UserSchema(BaseModel):
@@ -23,7 +23,7 @@ class UserRegDataSchema(UserLogDataSchema):
 
     @field_validator("password_repeat")
     @classmethod
-    def check_copy_password(cls, repeat_pass, info):
+    def validate_password_repeat(cls, repeat_pass: str, info: ValidationInfo) -> str:
         orig_pass = info.data.get("password")
         if repeat_pass != orig_pass:
             raise BadRequestException()

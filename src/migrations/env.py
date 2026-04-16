@@ -15,8 +15,8 @@ from alembic import context
 from alembic.autogenerate import rewriter
 from alembic.operations import ops
 
-from src.config import settings
-from src.database import BaseORM
+from src.core.config import settings
+from src.core.db import BaseORM
 from src.models import *  # noqa
 
 # this is the Alembic Config object, which provides

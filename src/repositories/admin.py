@@ -9,8 +9,8 @@ class AdminRepository(BaseRepository):
     model = UserAccessLevelsORM
     mapper = UserAccessLevelsMapper
 
-    async def get_is_activate(self, level: int):
-        access_level = {"access_level_id": level}
+    async def access_level_patch(self, access_level_id: int):
+        access_level = {"access_level_id": access_level_id}
         return UserAccessLevelsPatchMapper.schema.model_validate(access_level)
 
     async def get_user_access_level_id(self, user_id: int):

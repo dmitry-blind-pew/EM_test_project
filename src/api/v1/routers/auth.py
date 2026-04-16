@@ -1,12 +1,12 @@
 from fastapi import APIRouter, Response
 from fastapi_cache.decorator import cache
 
-from src.api.dependencies import UserIdDep, DBDep
+from src.api.deps import UserIdDep, DBDep
 from src.schemas.auth import UserRegDataSchema, UserPatchSchema, UserLogDataSchema
 from src.services.auth import AuthService
 
 
-router = APIRouter(prefix="/auth", tags=["Аутентификация и авторизация"])
+router = APIRouter()
 
 
 @router.get("/me", summary="Моя информация")

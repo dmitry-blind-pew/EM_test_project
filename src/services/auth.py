@@ -1,12 +1,10 @@
-from pydantic import BaseModel
-
-from src.config import settings
+from src.core.config import settings
 from passlib.context import CryptContext
 from datetime import datetime, timezone, timedelta
 import jwt
 
-from src.exceptions import UnauthorizedException, UserNotFoundException
-from src.schemas.auth import UserRegDataSchema, UserHashDataSchema, UserLogDataSchema, UserShortSchema
+from src.core.exceptions import UnauthorizedException, UserNotFoundException
+from src.schemas.auth import UserRegDataSchema, UserHashDataSchema, UserLogDataSchema, UserShortSchema, UserPatchSchema
 from src.services.base import BaseService
 
 
@@ -23,10 +21,10 @@ class AuthService(BaseService):
     def hash_password(self, password: str) -> str:
         return self.pwd_context.hash(password)
 
-    def verify_password(self, plain_password, hashed_password):
+    def verify_password(self, plain_password: str, hashed_password: str) -> bool:
         return self.pwd_context.verify(plain_password, hashed_password)
 
-    def decode_access_token(self, token: str) -> dict:
+    def decode_access_token(self, token: str) -> dict[str, int | str]:
         return jwt.decode(token, settings.JWT_SECRET_KEY, algorithms=[settings.JWT_ALGORITHM])
 
     async def login_user(self, user_data: UserLogDataSchema) -> str:
@@ -39,7 +37,7 @@ class AuthService(BaseService):
         access_token = self.create_access_token({"user_id": user.id, "access_level_id": user_access.access_level_id})
         return access_token
 
-    async def register_user(self, user_data: UserRegDataSchema):
+    async def register_user(self, user_data: UserRegDataSchema) -> None:
         hashed_password = self.hash_password(user_data.password)
         hashed_user_data = UserHashDataSchema(
             first_name=user_data.first_name,
@@ -52,18 +50,18 @@ class AuthService(BaseService):
         await self.db.admin.add(user_data_access)
         await self.db.commit()
 
-    async def get_me(self, user_id: int):
+    async def get_me(self, user_id: int) -> UserShortSchema:
         user = await self.db.users.get_one_or_none(id=user_id)
         if user is None:
             raise UnauthorizedException()
         user_short = UserShortSchema(**user.model_dump())
         return user_short
 
-    async def patch_user(self, user_id: int, user_data: BaseModel):
+    async def patch_user(self, user_id: int, user_data: UserPatchSchema) -> None:
         await self.db.users.edit(id=user_id, update_data=user_data, exclude_unset=True)
         await self.db.commit()
 
-    async def delete_user(self, user_id: int):
-        status = await self.db.users.get_is_activate()
+    async def delete_user(self, user_id: int) -> None:
+        status = await self.db.users.get_deactivate()
         await self.db.users.edit(id=user_id, update_data=status, exclude_unset=True)
         await self.db.commit()

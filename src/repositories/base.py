@@ -11,7 +11,11 @@ class BaseRepository:
     def __init__(self, session):
         self.session = session
 
-    async def get_filtered(self, *filter, limit: int | None = None, offset: int = 0, **filter_by):
+    async def get_filtered(self, *filter, limit: int | None = None, offset: int = 0, **filter_by) -> list:
+        if offset < 0:
+            raise ValueError("offset must be greater than or equal to 0")
+        if limit is not None and limit <= 0:
+            raise ValueError("limit must be greater than 0")
         query = select(self.model).filter(*filter).filter_by(**filter_by).limit(limit).offset(offset)
         result = await self.session.execute(query)
         model_orm = result.scalars().all()
@@ -23,7 +27,7 @@ class BaseRepository:
         model_orm = result.scalars().one()
         return self.mapper.map_to_domain_entity(model_orm)
 
-    async def add_bulk(self, data: list[BaseModel]):
+    async def add_bulk(self, data: list[BaseModel]) -> None:
         if not data:
             return
         add_data_statement = insert(self.model).values([item.model_dump() for item in data])

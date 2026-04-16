@@ -3,7 +3,7 @@ import json
 from typing import AsyncGenerator
 from unittest import mock
 
-from src.api.dependencies import get_db
+from src.api.deps import get_db
 from src.schemas.access import AccessLevelsSchema
 from src.schemas.data import DataAddSchema
 from src.services.auth import AuthService
@@ -13,8 +13,8 @@ mock.patch("fastapi_cache.decorator.cache", lambda *args, **kwargs: lambda f: f)
 import pytest
 from httpx import ASGITransport, AsyncClient
 
-from src.config import settings
-from src.database import BaseORM, async_session_maker_null_pool, engine_null_pool
+from src.core.config import settings
+from src.core.db import BaseORM, async_session_maker_null_pool, engine_null_pool
 from src.main import app
 from src.models import *  # noqa
 from src.utils.db_manager import DBManager

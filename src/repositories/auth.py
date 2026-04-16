@@ -10,7 +10,7 @@ class UsersRepository(BaseRepository):
     model = UsersORM
     mapper = UsersMapper
 
-    async def get_is_activate(self):
+    async def get_deactivate(self):
         is_active = {"is_active": False}
         return UsersActiveMapper.schema.model_validate(is_active)
 

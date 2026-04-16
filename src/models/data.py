@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Mapped, mapped_column
 
-from src.database import BaseORM
+from src.core.db import BaseORM
 
 
 class DataORM(BaseORM):
