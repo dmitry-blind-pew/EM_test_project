@@ -2,9 +2,8 @@ from typing import Annotated
 from fastapi import Depends, Request
 
 from src.core.db import async_session_maker
-from src.core.exceptions import UnauthorizedException, ForbiddenException, DataNotFoundException
+from src.core.exceptions import UnauthorizedException, ForbiddenException
 from src.services.auth import AuthService
-from src.services.data import DataService
 from src.utils.db_manager import DBManager
 
 
@@ -44,15 +43,3 @@ async def get_db():
 
 
 DBDep = Annotated[DBManager, Depends(get_db)]
-
-
-async def get_allowed_data(data_id: int, user_access_level: UserAcsDep, db: DBDep):
-    data = await DataService(db).get_data(data_id)
-    if data is None:
-        raise DataNotFoundException()
-    if data.security_level > user_access_level:
-        raise ForbiddenException()
-    return data
-
-
-AllowData = Annotated[str, Depends(get_allowed_data)]

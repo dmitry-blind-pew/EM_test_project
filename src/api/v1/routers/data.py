@@ -2,21 +2,15 @@ from fastapi import APIRouter
 from fastapi_cache.decorator import cache
 
 from src.api.deps import DBDep, AdminDep, UserAcsDep
-from src.core.exceptions import ForbiddenException, DataNotFoundException
 from src.services.data import DataService
 
 router = APIRouter()
 
 
 @router.get("/{data_id}", summary="Получить данные")
-async def get_data(data_id: int, chal: UserAcsDep, db: DBDep):
-    ttl = 300 if chal > 1 else 60
-
-    @cache(expire=ttl)
-    def get_data_cached(data_id: AllowData):
-        return data.content
-
-    return await get_data_cached(data_id, chal)
+@cache(expire=60)
+async def get_data(data_id: int, chal: UserAcsDep, db: DBDep) -> str:
+    return await DataService(db).get_allowed_data_content(data_id=data_id, user_access_level=chal)
 
 
 @router.post("", summary="Добавление информации")
