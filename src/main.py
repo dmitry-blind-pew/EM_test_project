@@ -15,6 +15,7 @@ from src.core.redis_connector import redis_connector
 
 logger = logging.getLogger(__name__)
 
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     logger.info("Запуск приложения: начинаем инициализацию...")

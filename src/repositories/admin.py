@@ -18,5 +18,7 @@ class AdminRepository(BaseRepository):
         """Получает текущую запись уровня доступа пользователя."""
         query = select(self.model).filter_by(user_id=user_id)
         result = await self.session.execute(query)
-        model_orm = result.scalars().one()
+        model_orm = result.scalars().one_or_none()
+        if model_orm is None:
+            return None
         return self.mapper.map_to_domain_entity(model_orm)

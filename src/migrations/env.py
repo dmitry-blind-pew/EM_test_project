@@ -12,8 +12,6 @@ from sqlalchemy import engine_from_config
 from sqlalchemy import pool
 
 from alembic import context
-from alembic.autogenerate import rewriter
-from alembic.operations import ops
 
 from src.core.config import settings
 from src.core.db import BaseORM
@@ -40,44 +38,6 @@ target_metadata = BaseORM.metadata
 # can be acquired:
 # my_important_option = config.get_main_option("my_important_option")
 # ... etc.
-
-writer = rewriter.Rewriter()
-
-
-@writer.rewrites(ops.CreateTableOp)
-def create_table_with_data(context, revision, op):
-    if op.table_name == "access_levels":
-        insert_op = ops.ExecuteSQLOp(
-            """INSERT INTO access_levels (name) 
-               VALUES ('User'), ('Premium'), ('Admin')
-               ON CONFLICT (name) DO NOTHING"""
-        )
-        return [op, insert_op]
-    if op.table_name == "data":
-        insert_op = ops.ExecuteSQLOp(
-            """INSERT INTO data (id, content, security_level) 
-               VALUES (1, 'Общедоступная информация', 1), (2, 'Секретная информация', 2)
-               ON CONFLICT DO NOTHING"""
-        )
-        return [op, insert_op]
-    if op.table_name == "user_access_levels":
-        insert_op = ops.ExecuteSQLOp(
-            """INSERT INTO user_access_levels (id, user_id, access_level_id) 
-               VALUES (1, 1, 1), (2, 2, 2), (3, 3, 3), (4, 4, 1)
-               ON CONFLICT DO NOTHING"""
-        )
-        return [op, insert_op]
-    if op.table_name == "users":
-        insert_op = ops.ExecuteSQLOp(
-            """INSERT INTO users (id, first_name, last_name, email, hashed_password, is_active) 
-               VALUES (1, 'ПОЛЬЗОВАТЕЛЬ', 'string', 'user@example.com', '$2b$12$EBtIRd7qO.cPyhtxF2r41.sGCl/.VQfti8geRnRK12imMSfOzG49O', true),
-                      (2, 'АДМИН', 'string', 'user1@example.com', '$2b$12$licaRtyvApARaZqjt/NC3OiPmOjky9r5fkGQ8Otf/CrQoIroIlAke', true),
-                      (3, 'ПРЕМИУМ', 'string', 'user2@example.com', '$2b$12$oziv7Dj/3m7IlT8v/EbP/ut0ETPA6YhgjLK1DxPLPLeidTvw6SKAK', true),
-                      (4, 'ДЛЯ_УДАЛЕНИЯ', 'string', 'user3@example.com', '$2b$12$usamsN20LOHNknBP7A2CQuqulPLGF4cQOA4T/.ru3s7HCGeZ31CGq', true)
-               ON CONFLICT DO NOTHING"""
-        )
-        return [op, insert_op]
-    return op
 
 
 def run_migrations_offline() -> None:
@@ -111,36 +71,6 @@ def run_migrations_online() -> None:
     and associate a connection with the context.
 
     """
-
-    def after_create_table(target, connection, **kw):
-        if target.name == "access_levels":
-            connection.execute(
-                """INSERT INTO access_levels (name) 
-                   VALUES ('User'), ('Premium'), ('Admin')
-                   ON CONFLICT (name) DO NOTHING"""
-            )
-        elif target.name == "data":
-            connection.execute(
-                """INSERT INTO data (id, content, security_level) 
-                   VALUES (1, 'Общедоступная информация', 1), (2, 'Секретная информация', 2)
-                   ON CONFLICT DO NOTHING"""
-            )
-        elif target.name == "user_access_levels":
-            connection.execute(
-                """INSERT INTO user_access_levels (id, user_id, access_level_id) 
-                   VALUES (1, 1, 1), (2, 2, 2), (3, 3, 3), (4, 4, 1)
-                   ON CONFLICT DO NOTHING"""
-            )
-        elif target.name == "users":
-            connection.execute(
-                """INSERT INTO users (id, first_name, last_name, email, hashed_password, is_active) 
-                   VALUES (1, 'ПОЛЬЗОВАТЕЛЬ', 'string', 'user@example.com', '$2b$12$EBtIRd7qO.cPyhtxF2r41.sGCl/.VQfti8geRnRK12imMSfOzG49O', true),
-                          (2, 'АДМИН', 'string', 'user1@example.com', '$2b$12$licaRtyvApARaZqjt/NC3OiPmOjky9r5fkGQ8Otf/CrQoIroIlAke', true),
-                          (3, 'ПРЕМИУМ', 'string', 'user2@example.com', '$2b$12$oziv7Dj/3m7IlT8v/EbP/ut0ETPA6YhgjLK1DxPLPLeidTvw6SKAK', true),
-                          (4, 'ДЛЯ_УДАЛЕНИЯ', 'string', 'user3@example.com', '$2b$12$usamsN20LOHNknBP7A2CQuqulPLGF4cQOA4T/.ru3s7HCGeZ31CGq', true)
-                   ON CONFLICT DO NOTHING"""
-            )
-
     connectable = engine_from_config(
         config.get_section(config.config_ini_section, {}),
         prefix="sqlalchemy.",
@@ -151,8 +81,6 @@ def run_migrations_online() -> None:
         context.configure(
             connection=connection,
             target_metadata=target_metadata,
-            after_create_table=after_create_table,
-            process_revision_directives=writer,
         )
 
         with context.begin_transaction():

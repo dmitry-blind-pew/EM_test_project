@@ -42,9 +42,7 @@ def upgrade() -> None:
     op.execute(
         "INSERT INTO data (id, content, security_level) \n               VALUES (1, 'Общедоступная информация', 1), (2, 'Секретная информация', 2)\n               ON CONFLICT DO NOTHING"
     )
-    op.execute(
-        "SELECT setval(pg_get_serial_sequence('data', 'id'), COALESCE((SELECT MAX(id) FROM data), 1), true)"
-    )
+    op.execute("SELECT setval(pg_get_serial_sequence('data', 'id'), COALESCE((SELECT MAX(id) FROM data), 1), true)")
     op.create_table(
         "users",
         sa.Column("id", sa.Integer(), nullable=False),
@@ -59,9 +57,7 @@ def upgrade() -> None:
     op.execute(
         "INSERT INTO users (id, first_name, last_name, email, hashed_password, is_active) \n               VALUES (1, 'ПОЛЬЗОВАТЕЛЬ', 'string', 'user@example.com', '$2b$12$EBtIRd7qO.cPyhtxF2r41.sGCl/.VQfti8geRnRK12imMSfOzG49O', true),\n                      (2, 'АДМИН', 'string', 'user1@example.com', '$2b$12$licaRtyvApARaZqjt/NC3OiPmOjky9r5fkGQ8Otf/CrQoIroIlAke', true),\n                      (3, 'ПРЕМИУМ', 'string', 'user2@example.com', '$2b$12$oziv7Dj/3m7IlT8v/EbP/ut0ETPA6YhgjLK1DxPLPLeidTvw6SKAK', true),\n                      (4, 'ДЛЯ_УДАЛЕНИЯ', 'string', 'user3@example.com', '$2b$12$usamsN20LOHNknBP7A2CQuqulPLGF4cQOA4T/.ru3s7HCGeZ31CGq', true)\n               ON CONFLICT DO NOTHING"
     )
-    op.execute(
-        "SELECT setval(pg_get_serial_sequence('users', 'id'), COALESCE((SELECT MAX(id) FROM users), 1), true)"
-    )
+    op.execute("SELECT setval(pg_get_serial_sequence('users', 'id'), COALESCE((SELECT MAX(id) FROM users), 1), true)")
     op.create_table(
         "user_access_levels",
         sa.Column("id", sa.Integer(), nullable=False),
