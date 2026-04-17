@@ -18,6 +18,9 @@ services:
       JWT_SECRET_KEY: dev_secret_key
       JWT_ALGORITHM: HS256
       JWT_ACCESS_TOKEN_EXPIRE_MINUTES: 30
+    command: >
+      sh -c "alembic upgrade head &&
+             uvicorn src.main:app --host 0.0.0.0 --port 8000"
     depends_on:
       db:
         condition: service_healthy
