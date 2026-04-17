@@ -11,14 +11,17 @@ class UsersRepository(BaseRepository):
     mapper = UsersMapper
 
     async def get_deactivate(self):
+        """Формирует схему патча для деактивации."""
         is_active = {"is_active": False}
         return UsersActiveMapper.schema.model_validate(is_active)
 
-    async def get_default_access_level(self, user_id: int):
+    async def get_default_access_level(self, *, user_id: int):
+        """Формирует дефолтное значение уровня доступа."""
         default_access_level = {"user_id": user_id, "access_level_id": 1}
         return UserAccessLevelsMapper.schema.model_validate(default_access_level)
 
-    async def get_user_with_hashed_password(self, email: EmailStr):
+    async def get_user_with_hashed_password(self, *, email: EmailStr):
+        """Возвращает пользователя с хэшем пароля по email."""
         query = select(self.model).filter_by(email=email)
         result = await self.session.execute(query)
         model_orm = result.scalars().one_or_none()

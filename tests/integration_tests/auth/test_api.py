@@ -3,6 +3,7 @@ from fastapi import HTTPException
 
 
 async def test_logout_revokes_access_to_me(auth_async_client):
+    """Проверяет недоступность роута /me после logout."""
     logout_response = await auth_async_client.post("/api/v1/auth/logout")
     assert logout_response.status_code == 200
 
@@ -19,11 +20,13 @@ async def test_logout_revokes_access_to_me(auth_async_client):
     ],
 )
 async def test_login_invalid_credentials_returns_error(async_client, email, password, expected_status):
+    """Проверяет ошибки логина при невалидных учетных данных."""
     response = await async_client.post("/api/v1/auth/login", json={"email": email, "password": password})
     assert response.status_code == expected_status
 
 
 async def test_login_inactive_user_rejected(async_client):
+    """Проверяет запрет аутентификации для деактивированного пользователя."""
     email = "inactive_user@example.com"
     password = "qwerty123"
 
@@ -60,6 +63,7 @@ async def test_login_inactive_user_rejected(async_client):
     ],
 )
 async def test_auth_reg_login_me_logout(email, password, first_name, pass_copy, status_code, async_client):
+    """Проверяет полный аутентификационный флоу с разными входными данными."""
     register_user = await async_client.post(
         "/api/v1/auth/register",
         json={"email": email, "password": password, "first_name": first_name, "password_repeat": pass_copy},

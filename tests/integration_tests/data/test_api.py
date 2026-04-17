@@ -17,6 +17,7 @@ import pytest
 async def test_admin_get_change_access_level(
     user_type, data_id, content, access_level, status_code_1, status_code_2, async_client, all_tokens
 ):
+    """Проверяет матрицу доступа к data-эндпоинтам."""
     get_data = await async_client.get(
         f"/api/v1/data/{data_id}",
         cookies={"access_token": all_tokens[user_type]},

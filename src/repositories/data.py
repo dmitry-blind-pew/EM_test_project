@@ -7,6 +7,7 @@ class DataRepository(BaseRepository):
     model = DataORM
     mapper = DataContentMapper
 
-    async def create_new_data(self, new_data: str, access_level: int):
+    async def create_new_data(self, *, new_data: str, access_level: int):
+        """Формирует схему новой записи данных."""
         new_data_stmt = {"content": new_data, "security_level": access_level}
         return self.mapper.schema.model_validate(new_data_stmt)

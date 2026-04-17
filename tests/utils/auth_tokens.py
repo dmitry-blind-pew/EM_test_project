@@ -5,6 +5,7 @@ from src.core.config import settings
 
 
 def build_expired_token() -> str:
+    """Формирует просроченный JWT токен доступа."""
     expired_payload = {
         "user_id": 1,
         "access_level_id": 1,

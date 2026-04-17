@@ -13,8 +13,9 @@ router = APIRouter()
     description="Возвращает содержимое данных с проверкой уровня доступа пользователя.",
 )
 @cache(expire=60)
-async def get_data(data_id: int, chal: UserAcsDep, db: DBDep) -> str:
-    return await DataService(db).get_allowed_data_content(data_id=data_id, user_access_level=chal)
+async def get_data(*, data_id: int, chal: UserAcsDep, db: DBDep) -> str:
+    """Возвращает контент, доступный текущему пользователю."""
+    return await DataService(db=db).get_allowed_data_content(data_id=data_id, user_access_level=chal)
 
 
 @router.post(
@@ -22,6 +23,7 @@ async def get_data(data_id: int, chal: UserAcsDep, db: DBDep) -> str:
     summary="Добавление информации",
     description="Создает новую запись данных с указанным уровнем доступа. (доступно только администратору)",
 )
-async def create_data(content: str, access_level: int, al: AdminDep, db: DBDep) -> dict[str, str]:
-    await DataService(db).create_data(content, access_level)
+async def create_data(*, content: str, access_level: int, al: AdminDep, db: DBDep) -> dict[str, str]:
+    """Создает запись данных с указанным уровнем доступа."""
+    await DataService(db=db).create_data(content=content, access_level=access_level)
     return {"status": "data_created"}
