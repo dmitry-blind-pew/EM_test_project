@@ -32,3 +32,8 @@ class DataNotFoundException(EMPException):
 class UserNotFoundException(EMPException):
     status_code = 404
     detail = "User not found"
+
+
+class UserAlreadyExistsException(EMPException):
+    status_code = 400
+    detail = "User already exists"

@@ -9,7 +9,7 @@ import uvicorn
 sys.path.append(str(Path(__file__).parent.parent))
 
 from src.api.v1.router import api_v1_router
-from src.init import redis_connector
+from src.core.redis_connector import redis_connector
 
 
 @asynccontextmanager

@@ -67,10 +67,12 @@ async def async_client():
 @pytest.fixture(scope="session", autouse=True)
 async def create_user(async_client, setup_database):
     await async_client.post(
-        "/auth/register",
+        "/api/v1/auth/register",
         json={
             "email": "test@gmail.com",
             "password": "1234",
+            "first_name": "Fixture",
+            "password_repeat": "1234",
         },
     )
 
@@ -78,7 +80,7 @@ async def create_user(async_client, setup_database):
 @pytest.fixture(scope="session")
 async def auth_async_client(create_user, async_client):
     await async_client.post(
-        "/auth/login",
+        "/api/v1/auth/login",
         json={
             "email": "test@gmail.com",
             "password": "1234",

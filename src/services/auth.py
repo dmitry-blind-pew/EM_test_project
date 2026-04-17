@@ -2,8 +2,9 @@ from src.core.config import settings
 from passlib.context import CryptContext
 from datetime import datetime, timezone, timedelta
 import jwt
+from sqlalchemy.exc import IntegrityError
 
-from src.core.exceptions import UnauthorizedException, UserNotFoundException
+from src.core.exceptions import UnauthorizedException, UserNotFoundException, UserAlreadyExistsException
 from src.schemas.auth import UserRegDataSchema, UserHashDataSchema, UserLogDataSchema, UserShortSchema, UserPatchSchema
 from src.services.base import BaseService
 
@@ -25,14 +26,17 @@ class AuthService(BaseService):
         return self.pwd_context.verify(plain_password, hashed_password)
 
     def decode_access_token(self, token: str) -> dict[str, int | str]:
-        return jwt.decode(token, settings.JWT_SECRET_KEY, algorithms=[settings.JWT_ALGORITHM])
+        try:
+            return jwt.decode(token, settings.JWT_SECRET_KEY, algorithms=[settings.JWT_ALGORITHM])
+        except jwt.PyJWTError as exc:
+            raise UnauthorizedException() from exc
 
     async def login_user(self, user_data: UserLogDataSchema) -> str:
         user = await self.db.users.get_user_with_hashed_password(email=user_data.email)
+        if user is None or not self.verify_password(user_data.password, user.hashed_password):
+            raise UnauthorizedException()
         if not user.is_active:
             raise UserNotFoundException()
-        if not self.verify_password(user_data.password, user.hashed_password):
-            raise UnauthorizedException()
         user_access = await self.db.admin.get_user_access_level_id(user_id=user.id)
         access_token = self.create_access_token({"user_id": user.id, "access_level_id": user_access.access_level_id})
         return access_token
@@ -45,7 +49,10 @@ class AuthService(BaseService):
             email=user_data.email,
             hashed_password=hashed_password,
         )
-        user = await self.db.users.add(hashed_user_data)
+        try:
+            user = await self.db.users.add(hashed_user_data)
+        except IntegrityError as exc:
+            raise UserAlreadyExistsException() from exc
         user_data_access = await self.db.users.get_default_access_level(user_id=user.id)
         await self.db.admin.add(user_data_access)
         await self.db.commit()

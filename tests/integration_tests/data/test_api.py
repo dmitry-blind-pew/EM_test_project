@@ -18,7 +18,7 @@ async def test_admin_get_change_access_level(
     user_type, data_id, content, access_level, status_code_1, status_code_2, async_client, all_tokens
 ):
     get_data = await async_client.get(
-        f"/data/{data_id}",
+        f"/api/v1/data/{data_id}",
         cookies={"access_token": all_tokens[user_type]},
     )
     assert get_data.status_code == status_code_1
@@ -26,7 +26,7 @@ async def test_admin_get_change_access_level(
         return
 
     create_data = await async_client.post(
-        "/data",
+        "/api/v1/data",
         params={"content": content, "access_level": access_level},
         cookies={"access_token": all_tokens[user_type]},
     )
