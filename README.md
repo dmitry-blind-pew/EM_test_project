@@ -1,5 +1,34 @@
 # Система управления доступом
 
+## Установка и запуск
+
+### Требования
+- Python 3.12+
+- PostgreSQL
+- Redis
+
+### Локальный запуск
+1. Создайте виртуальное окружение и активируйте его:
+   - Windows (PowerShell): `python -m venv .venv` и `.\.venv\Scripts\Activate.ps1`
+   - Linux/macOS: `python -m venv .venv` и `source .venv/bin/activate`
+2. Установите зависимости:
+   - runtime: `pip install -r requirements.txt`
+   - dev/test: `pip install -r requirements-dev.txt`
+3. Создайте `.env` в корне проекта и заполните все переменные.
+4. Запустите приложение:
+   - `uvicorn src.main:app --host 0.0.0.0 --port 8000 --reload`
+5. Документация API:
+   - Swagger UI: `http://localhost:8000/docs`
+   - ReDoc: `http://localhost:8000/redoc`
+
+### Запуск через Docker
+1. Убедитесь, что установлен Docker + Docker Compose.
+2. Выполните:
+   - `docker compose up --build`
+3. Приложение будет доступно:
+   - API: `http://localhost:8000`
+   - Swagger UI: `http://localhost:8000/docs`
+
 ## Уровни доступа
 Система использует три фиксированных уровня доступа с возможностью расширения:
 - **User** (уровень 1) - базовые права
@@ -23,9 +52,23 @@
   - Создавать новые данные
 
 ## Эндпоинты API
-- **`/auth/*`** - аутентификация и авторизация
-- **`/data/*`** - работа с защищенными данными
-- **`/admin/*`** - административные функции (только для Admin)
+- Префикс API: **`/api/v1`**
+
+### Auth
+- `POST /api/v1/auth/register` - регистрация пользователя
+- `POST /api/v1/auth/login` - вход, установка `access_token` в cookies
+- `POST /api/v1/auth/logout` - выход, удаление `access_token` из cookies
+- `GET /api/v1/auth/me` - получить профиль текущего пользователя
+- `PATCH /api/v1/auth/me` - частично обновить профиль текущего пользователя
+- `DELETE /api/v1/auth/me` - деактивировать текущего пользователя
+
+### Data
+- `GET /api/v1/data/{data_id}` - получить содержимое записи данных с проверкой уровня доступа
+- `POST /api/v1/data` - создать новую запись данных (только Admin)
+
+### Admin
+- `GET /api/v1/admin/users?user_id={id}` - получить информацию о пользователе (только Admin)
+- `PUT /api/v1/admin/users/roles?user_id={id}&access_level={level}` - изменить уровень доступа пользователя (только Admin)
 
 ## Аутентификация и Авторизация
 
