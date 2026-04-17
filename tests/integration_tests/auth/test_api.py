@@ -59,9 +59,7 @@ async def test_login_inactive_user_rejected(async_client):
         ("testyahoo.ru", "1234", "Dmitry", "1234", 422),
     ],
 )
-async def test_auth_reg_login_me_logout(
-    email, password, first_name, pass_copy, status_code, async_client
-):
+async def test_auth_reg_login_me_logout(email, password, first_name, pass_copy, status_code, async_client):
     register_user = await async_client.post(
         "/api/v1/auth/register",
         json={"email": email, "password": password, "first_name": first_name, "password_repeat": pass_copy},

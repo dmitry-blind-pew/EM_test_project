@@ -7,13 +7,21 @@ from src.services.data import DataService
 router = APIRouter()
 
 
-@router.get("/{data_id}", summary="Получить данные")
+@router.get(
+    "/{data_id}",
+    summary="Получить данные",
+    description="Возвращает содержимое данных с проверкой уровня доступа пользователя.",
+)
 @cache(expire=60)
 async def get_data(data_id: int, chal: UserAcsDep, db: DBDep) -> str:
     return await DataService(db).get_allowed_data_content(data_id=data_id, user_access_level=chal)
 
 
-@router.post("", summary="Добавление информации")
+@router.post(
+    "",
+    summary="Добавление информации",
+    description="Создает новую запись данных с указанным уровнем доступа. (доступно только администратору)",
+)
 async def create_data(content: str, access_level: int, al: AdminDep, db: DBDep) -> dict[str, str]:
     await DataService(db).create_data(content, access_level)
     return {"status": "data_created"}

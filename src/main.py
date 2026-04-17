@@ -21,7 +21,18 @@ async def lifespan(app: FastAPI):
     await redis_connector.disconnect()
 
 
-app = FastAPI(lifespan=lifespan)
+app = FastAPI(
+    title="EM Project",
+    description="## Система аутентификации и авторизации",
+    version="1.0.0",
+    docs_url="/docs",
+    redoc_url="/redoc",
+    contact={
+        "name": "Dmitry (Telegram)",
+        "url": "https://t.me/dmitry_kartab",
+    },
+    lifespan=lifespan,
+)
 
 app.include_router(api_v1_router)
 

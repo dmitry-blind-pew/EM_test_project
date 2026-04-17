@@ -14,10 +14,8 @@ def test_create_and_decode_jwt_token():
     assert decoded_jwt["user_id"] == data["user_id"]
     assert decoded_jwt["access_level_id"] == data["access_level_id"]
 
-@pytest.mark.parametrize(
-    "token",
-    [None, "this.is.not.a.valid.jwt", build_expired_token()]
-)
+
+@pytest.mark.parametrize("token", [None, "this.is.not.a.valid.jwt", build_expired_token()])
 async def test_me_token_guards_return_401(async_client, token):
     async_client.cookies.clear()
     if token is not None:
