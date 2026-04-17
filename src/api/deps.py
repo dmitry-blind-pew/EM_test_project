@@ -1,4 +1,5 @@
 from typing import Annotated
+import logging
 from fastapi import Depends, Request
 
 from src.core.db import async_session_maker
@@ -6,11 +7,14 @@ from src.core.exceptions import UnauthorizedException, ForbiddenException
 from src.services.auth import AuthService
 from src.utils.db_manager import DBManager
 
+logger = logging.getLogger(__name__)
+
 
 def get_access_token(*, request: Request) -> str:
     """Читает токена доступа из кук."""
     access_token = request.cookies.get("access_token", None)
     if not access_token:
+        logger.warning("Access token не найден в cookies")
         raise UnauthorizedException()
     return access_token
 
@@ -34,6 +38,7 @@ UserAcsDep = Annotated[int, Depends(get_current_access_level)]
 def require_admin(*, al: UserAcsDep) -> int:
     """Разрешает доступ только администраторам."""
     if al != 3:
+        logger.warning("Доступ к admin endpoint запрещен. access_level=%s", al)
         raise ForbiddenException()
     return al
 

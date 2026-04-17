@@ -1,4 +1,5 @@
 from src.core.config import settings
+import logging
 from passlib.context import CryptContext
 from datetime import datetime, timezone, timedelta
 import jwt
@@ -7,6 +8,8 @@ from sqlalchemy.exc import IntegrityError
 from src.core.exceptions import UnauthorizedException, UserNotFoundException, UserAlreadyExistsException
 from src.schemas.auth import UserRegDataSchema, UserHashDataSchema, UserLogDataSchema, UserShortSchema, UserPatchSchema
 from src.services.base import BaseService
+
+logger = logging.getLogger(__name__)
 
 
 class AuthService(BaseService):
@@ -33,17 +36,21 @@ class AuthService(BaseService):
         try:
             return jwt.decode(token, settings.JWT_SECRET_KEY, algorithms=[settings.JWT_ALGORITHM])
         except jwt.PyJWTError as exc:
+            logger.warning("Ошибка декодирования JWT: %s", exc.__class__.__name__)
             raise UnauthorizedException() from exc
 
     async def login_user(self, *, user_data: UserLogDataSchema) -> str:
         """Аутентифицирует пользователя и возвращает токен доступа."""
         user = await self.db.users.get_user_with_hashed_password(email=user_data.email)
         if user is None or not self.verify_password(plain_password=user_data.password, hashed_password=user.hashed_password):
+            logger.warning("Неуспешный логин для email=%s", user_data.email)
             raise UnauthorizedException()
         if not user.is_active:
+            logger.warning("Попытка входа деактивированного пользователя user_id=%s", user.id)
             raise UserNotFoundException()
         user_access = await self.db.admin.get_user_access_level_id(user_id=user.id)
         access_token = self.create_access_token(data={"user_id": user.id, "access_level_id": user_access.access_level_id})
+        logger.info("Успешный логин user_id=%s", user.id)
         return access_token
 
     async def register_user(self, *, user_data: UserRegDataSchema) -> None:
@@ -58,10 +65,12 @@ class AuthService(BaseService):
         try:
             user = await self.db.users.add(hashed_user_data)
         except IntegrityError as exc:
+            logger.warning("Попытка повторной регистрации email=%s", user_data.email)
             raise UserAlreadyExistsException() from exc
         user_data_access = await self.db.users.get_default_access_level(user_id=user.id)
         await self.db.admin.add(user_data_access)
         await self.db.commit()
+        logger.info("Пользователь зарегистрирован user_id=%s", user.id)
 
     async def get_me(self, *, user_id: int) -> UserShortSchema:
         """Возвращает профиль текущего пользователя."""

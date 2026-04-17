@@ -14,9 +14,9 @@ class BaseRepository:
     async def get_filtered(self, *filter, limit: int | None = None, offset: int = 0, **filter_by) -> list:
         """Возвращает список сущностей по фильтрам."""
         if offset < 0:
-            raise ValueError("offset must be greater than or equal to 0")
+            raise ValueError("offset должен быть больше или равен 0")
         if limit is not None and limit <= 0:
-            raise ValueError("limit must be greater than 0")
+            raise ValueError("limit должен быть больше 0")
         query = select(self.model).filter(*filter).filter_by(**filter_by).limit(limit).offset(offset)
         result = await self.session.execute(query)
         model_orm = result.scalars().all()
